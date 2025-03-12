@@ -1,18 +1,34 @@
-"use client";
-import axios from "axios";
-import { useEffect } from "react";
+import { Metadata } from "next";
+import fs from "fs";
+import path from "path";
+import { DataTable } from "./data-table-components/data-table";
+import { columns } from "./data-table-components/columns";
 
-export default function Home() {
-  const getData = async () => {
-    const response = await axios.get("http://localhost:9999");
-    console.log(response);
-  };
-  useEffect(() => {
-    getData();
-  }, []);
+export const metadata: Metadata = {
+  title: "Expenses",
+  description: "A Expense tracker build using Tanstack Table.",
+};
+
+async function getData() {
+  const filePath = path.join(
+    process.cwd(),
+    "src/app/data-table-components",
+    "data.json"
+  );
+  const data = fs.readFileSync(filePath, "utf8");
+  return JSON.parse(data);
+}
+
+export default async function Page() {
+  const data = await getData();
+  console.log("data", data);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      "hello world admin"
+    <div className="h-full flex-1 flex-col space-y-2 p-8 md:flex">
+      <div className="flex items-center justify-between">
+        <p className="text-muted-foreground">Order</p>
+      </div>
+      <DataTable data={data} columns={columns} />
     </div>
   );
 }
