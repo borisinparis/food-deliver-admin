@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -11,13 +10,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import axios from "axios";
+type FoodInfoTypes = {
+  foodName: string;
+  ingredients: string;
+  price: string;
+};
 
 export const FoodMenu = () => {
   const [foodName, setFoodName] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
-  const [getDataFoods, setGetDataFoods] = useState({});
+  const [getDataFoods, setGetDataFoods] = useState<FoodInfoTypes[]>([]);
 
   const handleSubmitCategory = async () => {
     try {
@@ -34,7 +38,7 @@ export const FoodMenu = () => {
   const getData = async () => {
     try {
       const responseData = await axios.get("http://localhost:4000/foods");
-      console.log(responseData);
+      setGetDataFoods(responseData.data);
     } catch (err) {
       console.log("Error getData", err);
     }
@@ -61,7 +65,7 @@ export const FoodMenu = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Dishes Info</DialogTitle>
-              <div className="grid gap-4 py-4">
+              <div className="grid gap-4 py-4 ">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="dishName" className="text-right">
                     Dish name
@@ -117,7 +121,18 @@ export const FoodMenu = () => {
             </DialogHeader>
           </DialogContent>
         </Dialog>
-        {}
+        <div className="food-list">
+          {getDataFoods.map((el, index) => (
+            <div
+              key={index}
+              className="border-4 w-[270px] border-red-500 border-dashed"
+            >
+              <h3>{el.foodName}</h3>
+              <p>{el.ingredients}</p>
+              <p>${el.price}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );
