@@ -15,6 +15,7 @@ type FoodInfoTypes = {
   foodName: string;
   ingredients: string;
   price: string;
+  image: string;
 };
 
 const NEXT_PUBLIC_CLOUDINARY_APIKEY = "533495513536988";
@@ -65,6 +66,7 @@ export const FoodMenu = () => {
       });
       console.log("Image upload response:", response);
       setUploadImage(response.data.secure_url);
+
       return response.data.secure_url;
     } catch (err) {
       console.error("Error uploading image:", err);
@@ -73,15 +75,17 @@ export const FoodMenu = () => {
   };
 
   const handleSubmitCategory = async () => {
-    const imageUrl = await UploadImageToCloudinary();
-    if (!imageUrl) return;
+    await UploadImageToCloudinary();
+    console.log(uploadImage);
+
+    if (!uploadImage) return;
 
     try {
       const response = await axios.post("http://localhost:4000/foods", {
         foodName,
         price,
         ingredients,
-        imageUrl,
+        uploadImage,
       });
 
       getData();
@@ -95,6 +99,8 @@ export const FoodMenu = () => {
     try {
       const responseData = await axios.get("http://localhost:4000/foods");
       setGetDataFoods(responseData.data);
+
+      console.log(responseData.data);
     } catch (err) {
       console.log("Error getData", err);
     }
@@ -193,7 +199,7 @@ export const FoodMenu = () => {
               <h3>{el.foodName}</h3>
               <p>{el.ingredients}</p>
               <p>{el.price}</p>
-              <div>{el.imageUrl}</div>
+              <img src={el.image} />
             </div>
           ))}
         </div>
