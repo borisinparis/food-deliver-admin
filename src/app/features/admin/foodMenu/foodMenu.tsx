@@ -8,33 +8,89 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import axios from "axios";
+
 type FoodInfoTypes = {
   foodName: string;
   ingredients: string;
   price: string;
 };
 
+const NEXT_PUBLIC_CLOUDINARY_APIKEY = "533495513536988";
+const CLOUDINARY_UPLOAD_PRESET = "ml_default";
+const CLOUDINARY_CLOUD_NAME = "dfutcgigt";
+const API_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
 export const FoodMenu = () => {
+  const [imageData, setImageData] = useState<File | null>(null);
   const [foodName, setFoodName] = useState("");
+  const [previewImage, setPreviewImage] = useState<string | undefined>();
   const [ingredients, setIngredients] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
   const [getDataFoods, setGetDataFoods] = useState<FoodInfoTypes[]>([]);
+  const [uploadImage, setUploadImage] = useState("");
+
+  const handleUpLoading = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const file = files[0];
+    setImageData(file);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPreviewImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const UploadImageToCloudinary = async () => {
+    if (!imageData) {
+      alert("Please insert photo");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", imageData);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    formData.append("api_key", NEXT_PUBLIC_CLOUDINARY_APIKEY);
+
+    try {
+      const response = await axios.post(API_URL, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Image upload response:", response);
+      setUploadImage(response.data.secure_url);
+      return response.data.secure_url;
+    } catch (err) {
+      console.error("Error uploading image:", err);
+      return null;
+    }
+  };
 
   const handleSubmitCategory = async () => {
+    const imageUrl = await UploadImageToCloudinary();
+    if (!imageUrl) return;
+
     try {
       const response = await axios.post("http://localhost:4000/foods", {
-        foodName: foodName,
-        price: price,
-        ingredients: ingredients,
+        foodName,
+        price,
+        ingredients,
+        imageUrl,
       });
+
+      getData();
       console.log("Category created", response.data);
     } catch (err) {
       console.error("Error creating category", err);
     }
   };
+
   const getData = async () => {
     try {
       const responseData = await axios.get("http://localhost:4000/foods");
@@ -43,6 +99,7 @@ export const FoodMenu = () => {
       console.log("Error getData", err);
     }
   };
+
   useEffect(() => {
     getData();
   }, []);
@@ -79,11 +136,11 @@ export const FoodMenu = () => {
                 </div>
 
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="dishName" className="text-right">
+                  <Label htmlFor="category" className="text-right">
                     Category
                   </Label>
                   <Input
-                    id="dishName"
+                    id="category"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className="col-span-3"
@@ -114,6 +171,12 @@ export const FoodMenu = () => {
                     className="col-span-3"
                   />
                 </div>
+
+                <div>
+                  <input type="file" onChange={handleUpLoading} />
+                  <p>Preview: </p>
+                  {previewImage && <img src={previewImage} alt="preview-img" />}
+                </div>
                 <Button onClick={handleSubmitCategory} variant="outline">
                   Add
                 </Button>
@@ -129,7 +192,8 @@ export const FoodMenu = () => {
             >
               <h3>{el.foodName}</h3>
               <p>{el.ingredients}</p>
-              <p>${el.price}</p>
+              <p>{el.price}</p>
+              <div>{el.imageUrl}</div>
             </div>
           ))}
         </div>
