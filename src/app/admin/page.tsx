@@ -2,7 +2,6 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import * as React from "react";
-import { Checkbox } from "@/components/ui/checkbox";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import FoodMenu from "./foodMenu/foodMenu";
