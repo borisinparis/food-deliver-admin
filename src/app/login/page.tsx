@@ -13,11 +13,6 @@ type LoginInfoTypes = {
   password: string;
 };
 
-const NEXT_PUBLIC_CLOUDINARY_APIKEY = "533495513536988";
-const CLOUDINARY_UPLOAD_PRESE = "ml_default";
-const CLOUDINARY_CLOUD_NAME = "dfutcgigt";
-const API_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-
 export const Login = () => {
   const { push } = useRouter();
   const [getDatas, setGetDatas] = useState([]);
@@ -42,7 +37,7 @@ export const Login = () => {
 
       console.log(response.data.user.role);
       if (response.data.user.role == "ADMIN") {
-        push("/features/admin");
+        push("/admin");
       }
     } catch (error: any) {
       toast.error(`error:${error.response?.data?.message || error.message} `);

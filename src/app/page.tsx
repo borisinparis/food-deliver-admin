@@ -1,5 +1,5 @@
 "use client";
-import Login from "@/app/features/login/page";
+import Login from "@/app/login/page";
 
 export default function Home() {
   return (
