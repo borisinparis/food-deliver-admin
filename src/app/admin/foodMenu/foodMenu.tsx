@@ -22,10 +22,12 @@ type FoodInfoTypes = {
   ingredients: string;
   price: string;
   image: string;
+  category: string;
 };
 type CategoryTypes = {
   _id: string;
   categoryName: string;
+  numbers: number;
 };
 
 export const FoodMenu = () => {
@@ -39,8 +41,8 @@ export const FoodMenu = () => {
       foodName: "",
       ingredients: "",
       price: "",
-      category: "",
       image: "",
+      category: "",
     },
     validationSchema: foodSchema,
     onSubmit: async (values) => {
@@ -55,6 +57,7 @@ export const FoodMenu = () => {
         const response = await axios.post("http://localhost:4000/foods", {
           ...values,
           image: uploadedImageUrl,
+          category: values.category,
         });
         console.log("Food item added:", response.data);
         fetchData();
@@ -69,6 +72,7 @@ export const FoodMenu = () => {
     if (!file) return;
 
     setImageData(file);
+    formik.setFieldValue("image", file);
     const reader = new FileReader();
     reader.onload = () => setPreviewImage(reader.result as string);
     reader.readAsDataURL(file);
@@ -90,12 +94,13 @@ export const FoodMenu = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:4000/foods`,
+        `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
+
       return response.data.secure_url;
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -123,6 +128,7 @@ export const FoodMenu = () => {
       console.error("Error fetching food data:", error);
     }
   };
+
   const categoryFormik = useFormik({
     initialValues: {
       categoryName: "",
@@ -148,11 +154,24 @@ export const FoodMenu = () => {
   const fetchCategories = async () => {
     try {
       const response = await axios.get("http://localhost:4000/category");
-      setGetCategory(response.data);
+      const categories = response.data;
+
+      const updatedCategories = categories.map((category: CategoryTypes) => {
+        const dishCount = getDataFoods.filter(
+          (food) => food.category === category._id
+        ).length;
+
+        console.log(dishCount);
+
+        return { ...category, numbers: dishCount };
+      });
+
+      setGetCategory(updatedCategories);
     } catch (error) {
       console.error("Error fetching category data:", error);
     }
   };
+
   useEffect(() => {
     fetchData();
     fetchCategories();
@@ -173,7 +192,9 @@ export const FoodMenu = () => {
               key={index}
             >
               <span>{el.categoryName}</span>
-              <span className="bg-black text-white text-sm font-medium px-2 py-1 rounded-full"></span>
+              <span className="bg-black text-white text-sm font-medium px-2 py-1 rounded-full">
+                {el.numbers}
+              </span>
             </button>
           ))}
         </div>
@@ -217,34 +238,32 @@ export const FoodMenu = () => {
           </DialogContent>
         </Dialog>
       </div>
+      {getCategory.map((el) => (
+        <div key={el._id} className=" flexl p-4 space-y-6">
+          <div className="w-full max-w-[270px] mx-auto h-[241px] border border-gray-300 rounded-[20px] p-[16px] shadow-md hover:shadow-lg transition-shadow duration-300">
+            <p className="text-center font-semibold text-lg text-gray-700">
+              {el.categoryName}
+            </p>
 
-      {getCategory.map((el, index) => (
-        <div
-          key={el._id}
-          className="w-[270.75px] h-[241px] border border-gray-300 rounded-[20px] p-[8px_16px] shadow-md hover:shadow-lg transition-shadow duration-300"
-        >
-          <p key={index}>{el.categoryName}</p>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="m-auto flex items-center justify-center w-12 h-12 border-2 border-gray-200 rounded-lg p-4 shadow-lg hover:bg-indigo-100 transition-all duration-200"
+                >
+                  +
+                </Button>
+              </DialogTrigger>
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                className="m-auto flex items-center justify-center w-12 h-12 border-2 border-gray-200 rounded-lg p-4 shadow-lg"
-              >
-                +
-              </Button>
-            </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Enter Food Details</DialogTitle>
+                  <DialogDescription>
+                    Fill in the food details here. Click save when you're done.
+                  </DialogDescription>
+                </DialogHeader>
 
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Enter Food Details</DialogTitle>
-                <DialogDescription>
-                  Fill in the food details here. Click save when you're done.
-                </DialogDescription>
-              </DialogHeader>
-
-              <form onSubmit={formik.handleSubmit}>
-                <div className="grid gap-4 py-4">
+                <form onSubmit={formik.handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="foodName" className="text-right">
                       Dish Name
@@ -322,50 +341,52 @@ export const FoodMenu = () => {
                       )}
                     </div>
                   </div>
-                </div>
 
-                <DialogFooter>
-                  <Button
-                    type="submit"
-                    disabled={formik.isSubmitting}
-                    className="bg-indigo-600 text-white rounded-lg py-3 px-8 mt-4 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-400"
-                  >
-                    {formik.isSubmitting ? "Submitting..." : "Add Dish"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+                  <DialogFooter>
+                    <Button
+                      type="submit"
+                      disabled={formik.isSubmitting}
+                      className="bg-indigo-600 text-white rounded-lg py-3 px-8 mt-4 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-400"
+                    >
+                      {formik.isSubmitting ? "Submitting..." : "Add Dish"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {getDataFoods
+              .filter((food) => food.category === el._id)
+              .map((food) => (
+                <div
+                  key={food._id}
+                  className="border-2 border-gray-200 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300"
+                >
+                  <div className="relative">
+                    <button
+                      onClick={() => deleteFood(food._id)}
+                      className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors duration-200"
+                    >
+                      ❌
+                    </button>
+                    <img
+                      src={food.image}
+                      alt={food.foodName}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                  </div>
+                  <h3 className="text-2xl font-semibold text-gray-800 mt-4">
+                    {food.foodName}
+                  </h3>
+                  <p className="text-gray-600 mt-2">{food.ingredients}</p>
+                  <p className="text-gray-800 font-bold mt-4">${food.price}</p>
+                </div>
+              ))}
+          </div>
         </div>
       ))}
-
-      {/* <div className="w-full max-w-7xl mx-auto pl-10 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
-        {getDataFoods.map((food, index) => (
-          <div
-            key={index}
-            className="border-2 border-gray-200 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300"
-          >
-            <div className="relative">
-              <button
-                onClick={() => deleteFood(food._id)}
-                className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100"
-              >
-                ❌
-              </button>
-              <img
-                src={food.image}
-                alt={food.foodName}
-                className="w-full h-48 object-cover rounded-lg"
-              />
-            </div>
-            <h3 className="text-2xl font-semibold text-gray-800 mt-4">
-              {food.foodName}
-            </h3>
-            <p className="text-gray-600 mt-2">{food.ingredients}</p>
-            <p className="text-gray-800 font-bold mt-4">${food.price}</p>
-          </div>
-        ))}
-      </div> */}
     </>
   );
 };
