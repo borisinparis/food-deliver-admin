@@ -59,6 +59,8 @@ export const FoodMenu = () => {
           image: uploadedImageUrl,
           category: values.category,
         });
+        console.log(uploadedImageUrl);
+
         console.log("Food item added:", response.data);
         fetchData();
       } catch (error) {
@@ -100,6 +102,7 @@ export const FoodMenu = () => {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
+      console.log(response);
 
       return response.data.secure_url;
     } catch (error) {
