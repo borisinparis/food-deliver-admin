@@ -7,7 +7,7 @@ import {
   Search,
   Settings,
 } from "lucide-react";
-
+import Link from "next/link"; // Import Link from react-router-dom
 import {
   Sidebar,
   SidebarContent,
@@ -18,22 +18,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useRouter } from "next/router";
 
 // Menu items.
 const items = [
   {
     title: "Food Menu",
-    url: "#",
+    url: "/food-menu", // Adjust URL to be a valid route
     icon: Menu,
   },
   {
     title: "Orders",
-    url: "#",
+    url: "admin/order", // Adjust URL to be a valid route
     icon: Car,
   },
   {
     title: "Settings",
-    url: "#",
+    url: "/settings", // Adjust URL to be a valid route
     icon: Settings,
   },
 ];
@@ -49,10 +50,10 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
