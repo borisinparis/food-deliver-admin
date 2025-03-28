@@ -23,11 +23,6 @@ export const Login = () => {
     password: "",
   });
 
-  // const handleClick = () => {
-  //   toast.success("This is a success message!");
-  //   toast.error("This is an error message!");
-  // };
-
   const handleSubmit = async (values: LoginInfoTypes) => {
     try {
       const response = await axios.post(

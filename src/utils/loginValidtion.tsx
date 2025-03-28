@@ -5,3 +5,6 @@ export let userSchema = object({
   email: string().email().required(),
   password: string().min(8).required(),
 });
+export const addCategoryValidationSchema = Yup.object({
+  categoryName: Yup.string().required("Category name is required"),
+});

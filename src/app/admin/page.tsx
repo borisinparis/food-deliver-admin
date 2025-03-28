@@ -1,39 +1,20 @@
 "use client";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import * as React from "react";
-import axios from "axios";
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
+
+import { Settings } from "lucide-react";
+import AdminControllerBar from "./components/adminControllerBar";
 import FoodMenu from "./foodMenu/foodMenu";
+import Order from "./order/page";
 
-export const AdminPage = () => {
-  const [orders, setOrders] = useState([]);
-
-  const getData = async () => {
-    try {
-      const response = await axios.get("http://localhost:4000/admin/");
-      console.log(response);
-      setOrders(response.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  useEffect(() => {
-    getData();
-  }, []);
-
+export default function Home() {
+  const [step, setStep] = useState("menu");
   return (
-    <>
-      <SidebarProvider>
-        <AppSidebar />
-        <main>
-          <SidebarTrigger />
-          <FoodMenu />
-        </main>
-      </SidebarProvider>
-    </>
+    <div className="w-screen h-screen">
+      <AdminControllerBar setStep={setStep} />
+      {step === "menu" && <FoodMenu />}
+      {step === "orders" && <Order />}
+      {step === "settings" && <Settings />}
+    </div>
   );
-};
-
-export default AdminPage;
+}

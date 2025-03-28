@@ -1,13 +1,4 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -15,6 +6,7 @@ import axios from "axios";
 import { useFormik } from "formik";
 import { foodSchema } from "@/utils/foodSchema";
 import * as yup from "yup";
+import { NavigationBar } from "./_components/NavigationBar";
 
 type FoodInfoTypes = {
   _id: string;
@@ -182,65 +174,6 @@ export const FoodMenu = () => {
 
   return (
     <>
-      <div className="w-full max-w-7xl mx-auto py-8 px-4">
-        <h2 className="text-4xl font-bold text-gray-900">Dishes Category</h2>
-        <div className="flex flex-wrap gap-4 p-6">
-          {getCategory.map((el, index) => (
-            <button
-              className={`flex items-center gap-2 rounded-3xl px-4 py-2 border ${
-                el.categoryName === "All Dishes"
-                  ? "border-red-500 text-black"
-                  : "border-gray-300 text-black hover:bg-gray-100"
-              }`}
-              key={index}
-            >
-              <span>{el.categoryName}</span>
-              <span className="bg-black text-white text-sm font-medium px-2 py-1 rounded-full">
-                {el.numbers}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              className="bg-red-500 text-white text-2xl rounded-[100%]"
-              variant="outline"
-            >
-              +
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add new category</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={categoryFormik.handleSubmit}>
-              <div className="gap-4 py-4">
-                <div className=" grid-cols-4 items-center gap-4">
-                  <Label
-                    htmlFor="categoryName"
-                    className="text-right text-lg font-inter font-medium text-[14px] leading-[14px] tracking-[-0.02em]"
-                  >
-                    Category Name
-                  </Label>
-                  <Input
-                    id="categoryName"
-                    name="categoryName"
-                    value={categoryFormik.values.categoryName}
-                    onChange={categoryFormik.handleChange}
-                    className="col-span-3"
-                    placeholder="Type category name..."
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit">Save changes</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
       {getCategory.map((el) => (
         <div key={el._id} className=" flexl p-4 space-y-6">
           <div className="w-full max-w-[270px] mx-auto h-[241px] border border-gray-300 rounded-[20px] p-[16px] shadow-md hover:shadow-lg transition-shadow duration-300">
@@ -394,4 +327,14 @@ export const FoodMenu = () => {
   );
 };
 
+export default FoodMenu;
+
+const FoodMenu = () => {
+  return (
+    <div className="w-screen h-screen p-7">
+      <NavigationBar />
+      <FoodContainer />
+    </div>
+  );
+};
 export default FoodMenu;
